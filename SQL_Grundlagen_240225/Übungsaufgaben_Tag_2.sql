@@ -37,3 +37,67 @@ SELECT CompanyName, AVG(Freight) AS AvgFreight FROM Orders
 JOIN Shippers ON Orders.ShipVia = Shippers.ShipperID
 GROUP BY CompanyName
 ORDER BY AvgFreight
+
+
+-- Datumsfunktionen:
+
+-- ‹bungen:
+-- 1. Alle Bestellungen (Orders) aus Q2 in 1997
+SELECT * FROM Orders 
+WHERE DATEPART(YEAR, OrderDate) = 1997 AND DATEPART(QUARTER, OrderDate) = 2
+
+-- 2. Alle Produkte (ProductName) die um Weihnachten herum (+-10 Tage) in
+-- 1996 verkauft wurden 
+SELECT ProductName FROM Products
+JOIN [Order Details] ON Products.ProductID = [Order Details].ProductID
+JOIN Orders ON Orders.OrderID = [Order Details].OrderID
+WHERE OrderDate BETWEEN '14.12.1996' AND '03.01.1997'
+
+-- 3. Alle Bestellungen (Orders) aus den USA (Customers Country) die im Jahr 1997 aufgegeben wurden
+-- (OrderDate in Orders) 'YYYYMMDD'
+SELECT * FROM Customers
+JOIN Orders ON Customers.CustomerID = Orders.CustomerID
+WHERE Country = 'USA' AND OrderDate BETWEEN '01.01.1997' AND '31.12.1997'
+
+SELECT * FROM Customers
+JOIN Orders ON Customers.CustomerID = Orders.CustomerID
+WHERE Country = 'USA' AND DATEPART(YEAR, OrderDate) = 1997
+
+-- 4. Welches Produkt (ProductName) hatte die groeﬂte Bestellmenge (Quantity in OD) im Februar 1998?
+SELECT TOP 1 ProductName FROM Products
+JOIN [Order Details] ON [Order Details].ProductID = Products.ProductID
+JOIN Orders ON Orders.OrderID = [Order Details].OrderID
+WHERE DATEPART(YEAR, OrderDate) = 1998 AND DATEPART(MONTH, OrderDate) = 2
+ORDER BY Quantity DESC
+
+-- 5. Wieviele Bestellungen kamen aus Spain (Customers) in Quartal 2 1997?
+--   Sind es mehr oder weniger als aus Frankreich? (2. Abfrage)
+SELECT * FROM Customers
+JOIN Orders ON Customers.CustomerID = Orders.CustomerID
+WHERE Country = 'Spain' AND DATEPART(QUARTER, OrderDate) = 2
+AND DATEPART(YEAR, OrderDate) = 1997
+UNION ALL
+SELECT * FROM Customers
+JOIN Orders ON Customers.CustomerID = Orders.CustomerID
+WHERE Country = 'France' AND DATEPART(QUARTER, OrderDate) = 2
+AND DATEPART(YEAR, OrderDate) = 1997
+
+-- Hatten wir Bestellungen, die wir zu spaet ausgeliefert haben? Wenn 
+-- ja, welche OrderIDs waren das und wieviele Tage
+-- waren wir zu spaet dran? (Verzoegerung = Unterschied zwischen Shipped 
+-- & Required Date in Orders) Tipp: DATEDIFF & ISNULL
+-- ISNULL prueft auf Null Werte und ersetzt diese wenn gewuenscht
+-- SELECT ISNULL(Fax, 'Nicht vorhanden!') as KeineFax, Fax FROM Customers
+/* 37
+OrderID, "TageZuSpaet"
+OrderID, "TageZuSpaet"
+OrderID, "TageZuSpaet"
+usw...
+*/
+
+SELECT * FROM Orders
+
+--ÑZensiereì alle Telefonnummern der Kunden (Phone): 
+--Es sollen immer nur noch die letzten 4 Ziffern/Symbole angezeigt werden. 
+--Alles davor soll mit einem X pro Symbol ersetzt werden.
+--Beispiel: Phone Ñ08677 9889 0ì; danach ÑXXXXXXXX89 0ì
