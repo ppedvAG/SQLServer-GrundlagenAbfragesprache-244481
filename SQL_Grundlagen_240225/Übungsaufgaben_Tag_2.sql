@@ -94,10 +94,29 @@ OrderID, "TageZuSpaet"
 OrderID, "TageZuSpaet"
 usw...
 */
+SELECT OrderId, DATEDIFF(DAY, RequiredDate, ISNULL(ShippedDate, GETDATE())) as TageZuSpaet FROM Orders
+WHERE DATEDIFF(DAY, RequiredDate, ISNULL(ShippedDate, GETDATE())) > 0
 
-SELECT * FROM Orders
 
 --„Zensiere“ alle Telefonnummern der Kunden (Phone): 
 --Es sollen immer nur noch die letzten 4 Ziffern/Symbole angezeigt werden. 
 --Alles davor soll mit einem X pro Symbol ersetzt werden.
 --Beispiel: Phone „08677 9889 0“; danach „XXXXXXXX89 0“
+SELECT REPLICATE('X', LEN(Phone) - 4) + RIGHT(Phone, 4) as NeueNummer FROM Customers
+SELECT STUFF(Phone, 1, LEN(Phone) - 4,  REPLICATE('X', LEN(Phone) - 4)) FROM Customers
+
+-- Hat „Andrew Fuller“ (Employee) schonmal Produkte der Kategorie 
+-- „Seafood“ (Categories) verkauft?
+-- Wenn ja, wieviel Lieferkosten sind 
+-- dabei insgesamt entstanden (Freight)?
+-- Das ganze mit Temporaere Tabellen machen
+SELECT SUM(Freight) as Lieferkosten 
+INTO #TempTable
+FROM Employees
+JOIN Orders ON Employees.EmployeeID = Orders.EmployeeID
+JOIN [Order Details] ON Orders.OrderID = [Order Details].OrderID
+JOIN Products ON Products.ProductID = [Order Details].ProductID
+JOIN Categories ON Categories.CategoryID = Products.CategoryID
+WHERE Employees.LastName = 'Fuller' AND Categories.CategoryName = 'Seafood'
+
+SELECT * FROM #TempTable
