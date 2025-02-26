@@ -40,3 +40,19 @@ JOIN Shippers ON Orders.ShipVia = Shippers.ShipperID
 GROUP BY CompanyName, DATEPART(YEAR, OrderDate)
 ORDER BY Geschäftsjahr, AvgFreight
 GO
+
+-- Erstelle eine Procedure, der man als Parameter eine OrderID übergeben kann.
+-- Bei Ausführung soll der Rechnungsbetrag dieser Order ausgegeben werden 
+-- SUM(Quantity * UnitPrice) + Freight = RechnungsSumme.
+
+CREATE PROCEDURE sp_RechnungsSumme @OrderID INT
+AS
+SELECT Orders.OrderID ,SUM(Quantity * UnitPrice) + Freight as RechnungsSumme FROM Orders
+JOIN [Order Details] ON Orders.OrderID = [Order Details].OrderID
+WHERE Orders.OrderID = @OrderID
+GROUP BY Orders.OrderID, Freight
+GO
+
+-- Ausgeben
+EXEC sp_RechnungsSumme 10250
+GO
